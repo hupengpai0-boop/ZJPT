@@ -3,337 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>习题智能训练检测系统</title>
+    <title>智教指挥中心 - 教师管理后台</title>
     <style>
         :root {
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --primary-green: #10b981;
+            --primary: #10b981; /* 极简绿 */
+            --primary-dark: #059669;
+            --accent-blue: #1e40af; /* 学历案助手蓝色 */
+            --bg: #f8fafc;
+            --sidebar-bg: #ffffff;
             --text-main: #1e293b;
-            --text-sub: #64748b;
-            --border-color: #e2e8f0;
-            --accent-light: #f0fdf4;
+            --border: #e2e8f0;
         }
 
-        body {
-            font-family: 'Inter', 'PingFang SC', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+        body { font-family: "Microsoft Yahei", sans-serif; display: flex; height: 100vh; margin: 0; background: var(--bg); color: var(--text-main); }
 
-        .container {
-            width: 100%;
-            max-width: 600px;
-            background: var(--card-bg);
-            padding: 40px;
-            border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
-            border: 1px solid var(--border-color);
-        }
+        /* 侧边栏样式 */
+        .sidebar { width: 240px; background: var(--sidebar-bg); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar h2 { color: var(--primary); font-size: 20px; margin-bottom: 30px; padding-left: 10px; }
+        .menu-item { padding: 12px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 8px; transition: 0.3s; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+        .menu-item:hover { background: #f1f5f9; }
+        .menu-item.active { background: var(--primary); color: white; }
 
-        /* 头部装饰 */
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
+        /* 主体区域 */
+        .main { flex: 1; padding: 40px; overflow-y: auto; }
+        .section { display: none; max-width: 1000px; margin: 0 auto; }
+        .section.active { display: block; animation: fadeIn 0.4s ease; }
 
-        .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #059669, #10b981);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        /* 卡片样式 */
+        .card { background: white; border-radius: 16px; padding: 25px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        h1 { font-size: 24px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
 
-        .header p {
-            color: var(--text-sub);
-            font-size: 14px;
-        }
+        /* 表单元素 */
+        textarea, input[type="text"] { width: 100%; border: 1px solid #d1d5db; border-radius: 10px; padding: 15px; margin-top: 10px; box-sizing: border-box; font-size: 14px; }
+        .btn { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn:hover { background: var(--primary-dark); opacity: 0.9; }
+        .btn:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        /* 表单样式 */
-        .input-group {
-            margin-bottom: 24px;
-        }
-
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-sub);
-        }
-
-        input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 15px;
-            box-sizing: border-box;
-            transition: all 0.2s;
-            background: #fdfdfd;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary-green);
-            box-shadow: 0 0 0 4px var(--accent-light);
-        }
-
-        /* 答题卡片 */
-        .question-card {
-            margin-top: 20px;
-        }
-
-        .progress-bar {
-            height: 6px;
-            background: var(--border-color);
-            border-radius: 10px;
-            margin-bottom: 24px;
-            overflow: hidden;
-        }
-
-        .progress-inner {
-            height: 100%;
-            background: var(--primary-green);
-            transition: width 0.4s ease;
-        }
-
-        #q-text {
-            font-size: 18px;
-            font-weight: 600;
-            line-height: 1.5;
-            margin-bottom: 24px;
-        }
-
-        .options-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .options-list li {
-            padding: 16px 20px;
-            margin-bottom: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .options-list li:hover {
-            border-color: var(--primary-green);
-            background-color: var(--accent-light);
-        }
-
-        .options-list li:active {
-            transform: scale(0.98);
-        }
-
-        /* 按钮样式 */
-        .btn {
-            background: var(--primary-green);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            width: 100%;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            margin-top: 10px;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
+        /* 学历案助手专有样式 */
+        .edu-header { color: var(--accent-blue); border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; }
+        .file-upload-box { margin: 20px 0; padding: 30px; border: 2px dashed #cbd5e1; border-radius: 12px; text-align: center; background: #fcfcfc; }
+        .btn-edu { background: var(--accent-blue); }
+        
+        /* 动画 */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* 结果展示 */
-        #result-area {
-            text-align: center;
-            display: none;
-        }
-
-        .score-circle {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: var(--accent-light);
-            color: var(--primary-green);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: 800;
-            margin: 0 auto 20px;
-            border: 2px solid var(--primary-green);
-        }
-
-        #status-msg {
-            margin-top: 15px;
-            font-size: 14px;
-            color: var(--text-sub);
-        }
-
-        .ai-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 10px;
-            background: var(--accent-light);
-            color: var(--primary-green);
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
+        .result-area { background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid var(--border); min-height: 100px; white-space: pre-wrap; line-height: 1.6; }
+        .btn-download { display: inline-block; background: #10b981; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <div class="ai-badge">AI 驱动 · 智能引擎</div>
-        <h1>习题智能训练检测系统</h1>
-        <p id="quiz-title-sub">AI-Powered Practice & Assessment</p>
+<div class="sidebar">
+    <h2>智教指挥中心</h2>
+    <div class="menu-item active" onclick="switchTab(this, 'dashboard')">📈 班级学情</div>
+    <div class="menu-item" onclick="switchTab(this, 'ai-lab')">✨ 智能出题</div>
+    <div class="menu-item" onclick="switchTab(this, 'edu-assistant')">📝 学历案助手</div>
+    <div class="menu-item" onclick="switchTab(this, 'library')">📂 试卷管理</div>
+</div>
+
+<div class="main">
+
+    <div id="dashboard" class="section active">
+        <h1>📈 班级学情看板</h1>
+        <div class="card">
+            <div style="margin-bottom: 20px;">
+                <label>选择试卷：</label>
+                <select id="quiz-selector" onchange="loadScores(this.value)" style="padding: 8px; border-radius: 5px;">
+                    <option value="101">生物基础测试 (101)</option>
+                </select>
+            </div>
+            <div id="stats-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                </div>
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #eee;">
+                        <th style="padding: 10px;">学生</th><th style="padding: 10px;">分数</th><th style="padding: 10px;">错题情况</th>
+                    </tr>
+                </thead>
+                <tbody id="score-list">
+                    </tbody>
+            </table>
+        </div>
     </div>
 
-    <div id="setup-area">
-        <div class="input-group">
-            <label>学员姓名</label>
-            <input type="text" id="input_name" placeholder="请输入姓名">
+    <div id="ai-lab" class="section">
+        <h1>✨ 智能教研实验室</h1>
+        <div class="card">
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button class="btn" style="flex:1" onclick="setAiMode('parse')">解析现有试卷</button>
+                <button class="btn" style="flex:1; background:#6366f1" onclick="setAiMode('gen')">AI 原创出题</button>
+            </div>
+            <p id="ai-mode-hint">请粘贴原始试卷文本，AI将自动结构化：</p>
+            <textarea id="ai-content" rows="8" placeholder="在此输入内容..."></textarea>
+            <input type="text" id="ai-title" placeholder="设置试卷标题（如：光合作用周测）">
+            <button class="btn" id="ai-pub-btn" onclick="publishQuiz()" style="width: 100%; margin-top: 15px;">立即发布试卷</button>
         </div>
-        <div class="input-group">
-            <label>班级信息</label>
-            <input type="text" id="input_class" placeholder="请输入班级">
-        </div>
-        <button class="btn" onclick="startQuiz()">开始智能训练</button>
-    </div>
-
-    <div id="quiz-area" style="display:none;">
-        <div class="progress-bar">
-            <div id="progress-inner" class="progress-inner" style="width: 0%"></div>
-        </div>
-        <div class="question-card">
-            <div id="q-text">正在初始化题目...</div>
-            <ul id="options" class="options-list"></ul>
+        <div id="ai-result" class="card" style="display:none; border: 2px dashed var(--primary);">
+            <p>✅ 发布成功！学生答题链接：</p>
+            <code id="quiz-link" style="color: var(--primary); font-weight: bold; word-break: break-all;"></code>
         </div>
     </div>
 
-    <div id="result-area">
-        <div class="score-circle" id="final-score">0</div>
-        <h3>训练完成</h3>
-        <p id="status-msg">正在将数据安全同步至云端...</p>
-        <button class="btn" onclick="location.reload()" style="background: var(--text-sub); margin-top: 20px;">重新训练</button>
+    <div id="edu-assistant" class="section">
+        <h1 class="edu-header">🎓 学历案书写助手</h1>
+        <div class="card">
+            <label style="font-weight: bold;">1. 描述您的教学需求</label>
+            <textarea id="edu-prompt" placeholder="例如：高中生物《细胞的有丝分裂》学历案，要求包含学习目标、评价任务等..."></textarea>
+            
+            <div class="file-upload-box">
+                <label for="pptFile" style="cursor: pointer;">
+                    <span style="font-size: 30px;">📁</span><br>
+                    <span style="color: var(--accent-blue); font-weight: bold;">点击上传 PPT 课件 (可选)</span>
+                </label>
+                <input type="file" id="pptFile" accept=".ppt,.pptx" style="display: none;" onchange="document.getElementById('file-name').innerText=this.files[0].name">
+                <div id="file-name" style="margin-top:10px; font-size: 12px; color: #64748b;">支持 .ppt / .pptx 格式</div>
+            </div>
+
+            <button class="btn btn-edu" id="edu-btn" onclick="generateEduPlan()" style="width: 100%;">生成学历案</button>
+        </div>
+
+        <div id="edu-result-card" class="card" style="display: none;">
+            <h3>✨ AI 生成建议</h3>
+            <div id="edu-output" class="result-area"></div>
+            <div id="edu-download-space"></div>
+        </div>
     </div>
+
+    <div id="library" class="section">
+        <h1>📂 试卷管理</h1>
+        <div class="card">
+            <p>此处将列出您在飞书库中已发布的所有试卷...</p>
+        </div>
+    </div>
+
 </div>
 
 <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const quizId = urlParams.get('id');
-    let questions = []; 
-    let currentIdx = 0;
-    let score = 0;
-    let wrongQuests = [];
-    let studentData = { student_name: '', class: '' };
+    const BACKEND_URL = "https://feishu-backend-gzwqrjhcca.cn-hangzhou.fcapp.run"; // 请确保这是你的阿里云地址
 
-    async function loadQuiz() {
-        if (!quizId) {
-            document.getElementById('q-text').innerText = "⚠️ 缺少试卷参数，请检查链接。";
-            return;
-        }
+    // 1. 选项卡切换逻辑
+    function switchTab(el, tabId) {
+        document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    // 2. 班级学情逻辑
+    async function loadScores(qid) {
+        const list = document.getElementById('score-list');
+        list.innerHTML = "加载中...";
         try {
-            const response = await fetch(`https://feishu-backend-gzwqrjhcca.cn-hangzhou.fcapp.run/api/get-quiz?id=${quizId}`);
-            const data = await response.json();
-            if (data.questions) {
-                questions = data.questions;
-                document.getElementById('quiz-title-sub').innerText = data.title || "智能训练评估";
-            }
-        } catch (error) {
-            console.error("加载失败:", error);
-        }
-    }
-    window.onload = loadQuiz;
-
-    function startQuiz() {
-        studentData.student_name = document.getElementById('input_name').value;
-        studentData.class = document.getElementById('input_class').value;
-        if(!studentData.student_name || !studentData.class) return alert("请完成身份验证");
-        if(questions.length === 0) return alert("训练引擎启动中，请稍候...");
-        
-        document.getElementById('setup-area').style.display = 'none';
-        document.getElementById('quiz-area').style.display = 'block';
-        showQuestion();
+            // 注意：需在后端补充此接口
+            const res = await fetch(`${BACKEND_URL}/api/get-all-scores?qid=${qid}`);
+            const data = await res.json();
+            list.innerHTML = data.map(item => `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 10px;">${item.student_name}</td>
+                    <td style="padding: 10px;"><span style="color:var(--primary);font-weight:bold">${item.score}</span></td>
+                    <td style="padding: 10px; font-size:12px; color:#64748b">${item.wrong_questions || '无'}</td>
+                </tr>
+            `).join('');
+        } catch(e) { list.innerHTML = "加载失败，请确保后端已部署成绩获取接口"; }
     }
 
-    function showQuestion() {
-        if(currentIdx >= questions.length) return finish();
-        
-        const q = questions[currentIdx];
-        const progress = ((currentIdx) / questions.length) * 100;
-        document.getElementById('progress-inner').style.width = progress + "%";
-        
-        document.getElementById('q-text').innerText = q.question || q.q;
-        const optsArea = document.getElementById('options');
-        optsArea.innerHTML = '';
-        
-        const currentOptions = q.options || q.opts;
-        const correctAnswer = q.answer || q.ans;
-
-        currentOptions.forEach((opt) => {
-            const li = document.createElement('li');
-            li.innerText = opt;
-            li.onclick = () => check(opt, correctAnswer);
-            optsArea.appendChild(li);
-        });
+    // 3. 智能出题逻辑
+    function setAiMode(mode) {
+        document.getElementById('ai-mode-hint').innerText = mode === 'parse' ? '请粘贴原始试卷文本：' : '请输入考察知识点或出题设想：';
     }
-
-    function check(selectedText, correctText) {
-        if(selectedText === correctText) {
-            score += Math.round(100 / questions.length);
-        } else {
-            wrongQuests.push(`第${currentIdx+1}题`);
-        }
-        currentIdx++;
-        showQuestion();
-    }
-
-    async function finish() {
-        document.getElementById('progress-inner').style.width = "100%";
-        document.getElementById('quiz-area').style.display = 'none';
-        document.getElementById('result-area').style.display = 'block';
+    async function publishQuiz() {
+        const content = document.getElementById('ai-content').value;
+        const title = document.getElementById('ai-title').value;
+        const btn = document.getElementById('ai-pub-btn');
+        if(!content || !title) return alert("请填写内容和标题");
         
-        const finalScore = (wrongQuests.length === 0) ? 100 : Math.min(score, 99);
-        document.getElementById('final-score').innerText = finalScore;
-
-        const payload = {
-            student_name: studentData.student_name,
-            class: studentData.class,
-            score: finalScore,
-            quiz_id: quizId,
-            wrong_questions: wrongQuests.length > 0 ? wrongQuests.join(', ') : "全对"
-        };
-
+        btn.disabled = true; btn.innerText = "⚡ AI 正在处理并同步飞书...";
+        
         try {
-            const res = await fetch('https://feishu-backend-gzwqrjhcca.cn-hangzhou.fcapp.run/api/feishu', {
+            const res = await fetch(`${BACKEND_URL}/api/teacher/ai-task`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ content, title })
             });
-            if(res.ok) document.getElementById('status-msg').innerHTML = "✅ 评估报告已加密存储至云端";
-        } catch (e) {
-            document.getElementById('status-msg').innerHTML = "❌ 同步中断，请留存结果页面";
-        }
+            const data = await res.json();
+            document.getElementById('ai-result').style.display = 'block';
+            document.getElementById('quiz-link').innerText = `https://endearing-brigadeiros-a8b0d1.netlify.app/?id=${data.qid}`;
+        } catch(e) { alert("发布失败"); }
+        finally { btn.disabled = false; btn.innerText = "立即发布试卷"; }
     }
+
+    // 4. 学历案助手逻辑
+    async function generateEduPlan() {
+        const prompt = document.getElementById('edu-prompt').value;
+        const btn = document.getElementById('edu-btn');
+        const output = document.getElementById('edu-output');
+        const resCard = document.getElementById('edu-result-card');
+
+        if(!prompt) return alert("请输入需求");
+
+        btn.disabled = true; btn.innerText = "🚀 AI 正在书写中...";
+        resCard.style.display = 'block';
+        output.innerText = "⏳ 正在连接扣子 AI 引擎，请稍候...";
+
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/teacher/edu-helper`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ prompt })
+            });
+            const data = await res.json();
+            output.innerText = data.text || "生成完成";
+            if(data.download_url) {
+                document.getElementById('edu-download-space').innerHTML = 
+                    `<a href="${data.download_url}" class="btn-download" target="_blank">📥 下载生成的学历案文档</a>`;
+            }
+        } catch(e) { output.innerText = "生成出错，请检查后端配置"; }
+        finally { btn.disabled = false; btn.innerText = "生成学历案"; }
+    }
+
+    // 初始加载
+    window.onload = () => loadScores('101');
 </script>
+
 </body>
 </html>
+
