@@ -66,7 +66,7 @@
         <h1>📈 班级学情看板</h1>
         <div class="card">
             <p style="color: #64748b;">正在实时同步飞书表格数据...</p>
-            </div>
+        </div>
     </div>
 
     <div id="ai-lab" class="section">
@@ -109,7 +109,6 @@
 </div>
 
 <script>
-    // 替换为你的真实阿里云函数 URL
     const BACKEND_URL = "https://feishu-backend-gzwqrjhcca.cn-hangzhou.fcapp.run";
 
     function switchTab(el, tabId) {
@@ -131,7 +130,7 @@
         btn.innerText = "🚀 AI 正在深度思考中...";
         resCard.style.display = 'block';
         downloadSpace.innerHTML = "";
-        output.innerHTML = "⏳ 正在上传并处理，请稍候...";
+        output.innerHTML = "⏳ 正在上传并处理，这可能需要约 30-60 秒，请稍候...";
 
         try {
             const res = await fetch(`${BACKEND_URL}/api/teacher/edu-helper`, {
@@ -140,7 +139,6 @@
                 body: JSON.stringify({ prompt })
             });
 
-            // 如果阿里云返回 500，这里会抛出错误
             if (!res.ok) {
                 const errorData = await res.json();
                 throw new Error(errorData.error || `服务器错误 (${res.status})`);
@@ -149,22 +147,23 @@
             const data = await res.json();
             
             // 正常显示结果
-            // 在 .then(data => { ... }) 或 await data = res.json() 后修改
-            const data = await res.json();
-            const output = document.getElementById('edu-output');
-            const downloadSpace = document.getElementById('edu-download-space');
-
-            output.innerText = data.text; // 显示 AI 的文字提示
+            output.innerText = data.text || "学历案生成完成！"; 
 
             if (data.download_url) {
-            // 渲染下载按钮
-           downloadSpace.innerHTML = `
-        <a href="${data.download_url}" 
-           style="display:block; background:#10b981; color:white; text-align:center; padding:12px; border-radius:8px; text-decoration:none; margin-top:15px; font-weight:bold;" 
-           target="_blank">
-           📥 点击下载学历案文档
-        </a>`;
-}
+                downloadSpace.innerHTML = `
+                    <a href="${data.download_url}" 
+                       style="display:block; background:#10b981; color:white; text-align:center; padding:12px; border-radius:8px; text-decoration:none; margin-top:15px; font-weight:bold;" 
+                       target="_blank">
+                       📥 点击下载学历案文档
+                    </a>`;
+            }
+        } catch (e) {
+            output.innerHTML = `<span class="error-msg">❌ 失败: ${e.message}</span>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "生成学历案";
+        }
+    }
 
     // 智能出题逻辑
     async function publishQuiz() {
@@ -195,6 +194,5 @@
 
 </body>
 </html>
-
 
 
