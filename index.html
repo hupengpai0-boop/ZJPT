@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>习题智能训练检测系统</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --primary-green: #10b981;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --accent-light: #f0fdf4;
+        }
+
+        body {
+            font-family: 'Inter', 'PingFang SC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color);
+        }
+
+        /* 头部装饰 */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #059669, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-sub);
+            font-size: 14px;
+        }
+
+        /* 表单样式 */
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-sub);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: all 0.2s;
+            background: #fdfdfd;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 4px var(--accent-light);
+        }
+
+        /* 答题卡片 */
+        .question-card {
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .progress-inner {
+            height: 100%;
+            background: var(--primary-green);
+            transition: width 0.4s ease;
+        }
+
+        #q-text {
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .options-list li {
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .options-list li:hover {
+            border-color: var(--primary-green);
+            background-color: var(--accent-light);
+        }
+
+        .options-list li:active {
+            transform: scale(0.98);
+        }
+
+        /* 按钮样式 */
+        .btn {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* 结果展示 */
+        #result-area {
+            text-align: center;
+            display: none;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--accent-light);
+            color: var(--primary-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0 auto 20px;
+            border: 2px solid var(--primary-green);
+        }
+
+        #status-msg {
+            margin-top: 15px;
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            background: var(--accent-light);
+            color: var(--primary-green);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="ai-badge">AI 驱动 · 智能引擎</div>
+        <h1>习题智能训练检测系统</h1>
+        <p id="quiz-title-sub">AI-Powered Practice & Assessment</p>
+    </div>
+
+    <div id="setup-area">
+        <div class="input-group">
+            <label>学员姓名</label>
+            <input type="text" id="input_name" placeholder="请输入姓名">
+        </div>
+        <div class="input-group">
+            <label>班级信息</label>
+            <input type="text" id="input_class" placeholder="请输入班级">
+        </div>
+        <button class="btn" onclick="startQuiz()">开始智能训练</button>
+    </div>
+
+    <div id="quiz-area" style="display:none;">
+        <div class="progress-bar">
+            <div id="progress-inner" class="progress-inner" style="width: 0%"></div>
+        </div>
+        <div class="question-card">
+            <div id="q-text">正在初始化题目...</div>
+            <ul id="options" class="options-list"></ul>
+        </div>
+    </div>
+
+    <div id="result-area">
+        <div class="score-circle" id="final-score">0</div>
+        <h3>训练完成</h3>
+        <p id="status-msg">正在将数据安全同步至云端...</p>
+        <button class="btn" onclick="location.reload()" style="background: var(--text-sub); margin-top: 20px;">重新训练</button>
+    </div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const quizId = urlParams.get('id');
+    let questions = []; 
+    let currentIdx = 0;
+    let score = 0;
+    let wrongQuests = [];
+    let studentData = { student_name: '', class: '' };
+
+    async function loadQuiz() {
+        if (!quizId) {
+            document.getElementById('q-text').innerText = "⚠️ 缺少试卷参数，请检查链接。";
+            return;
+        }
+        try {
+            const response = await fetch(`https://feishu-backend-gzwqrjhcca.cn-hangzhou.fcapp.run/api/get-quiz?id=${quizId}`);
+            const data = await response.json();
+            if (data.questions) {
+                questions = data.questions;
+                document.getElementById('quiz-title-sub').innerText = data.title || "智能训练评估";
+            }
+        } catch (error) {
+            console.error("加载失败:", error);
+        }
+    }
+    window.onload = loadQuiz;
+
+    function startQuiz() {
+        studentData.student_name = document.getElementById('input_name').value;
+        studentData.class = document.getElementById('input_class').value;
+        if(!studentData.student_name || !studentData.class) return alert("请完成身份验证");
+        if(questions.length === 0) return alert("训练引擎启动中，请稍候...");
+        
+        document.getElementById('setup-area').style.display = 'none';
+        document.getElementById('quiz-area').style.display = 'block';
+        showQuestion();
+    }
+
+    function showQuestion() {
+        if(currentIdx >= questions.length) return finish();
+        
+        const q = questions[currentIdx];
+        const progress = ((currentIdx) / questions.length) * 100;
+        document.getElementById('progress-inner').style.width = progress + "%";
+        
+        document.getElementById('q-text').innerText = q.question || q.q;
+        const optsArea = document.getElementById('options');
+        optsArea.innerHTML = '';
+        
+        const currentOptions = q.options || q.opts;
+        const correctAnswer = q.answer || q.ans;
+
+        currentOptions.forEach((opt) => {
+            const li = document.createElement('li');
+            li.innerText = opt;
+            li.onclick = () => check(opt, correctAnswer);
+            optsArea.appendChild(li);
+        });
+    }
+
+    function check(selectedText, correctText) {
+        if(selectedText === correctText) {
+            score += Math.round(100 / questions.length);
+        } else {
+            wrongQuests.push(`第${currentIdx+1}题`);
+        }
+        currentIdx++;
+        showQuestion();
+    }
+
+    async function finish() {
+        document.getElementById('progress-inner').style.width = "100%";
+        document.getElementById('quiz-area').style.display = 'none';
+        document.getElementById('result-area').style.display = 'block';
+        
+        const finalScore = (wrongQuests.length === 0) ? 100 : Math.min(score, 99);
+        document.getElementById('final-score').innerText = finalScore;
+
+        const payload = {
+            student_name: studentData.student_name,
+            class: studentData.class,
+            score: finalScore,
+            quiz_id: quizId,
+            wrong_questions: wrongQuests.length > 0 ? wrongQuests.join(', ') : "全对"
+        };
+
+        try {
+            const res = await fetch('https://feishu-backend-gzwqrjhcca.cn-hangzhou.fcapp.run/api/feishu', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            if(res.ok) document.getElementById('status-msg').innerHTML = "✅ 评估报告已加密存储至云端";
+        } catch (e) {
+            document.getElementById('status-msg').innerHTML = "❌ 同步中断，请留存结果页面";
+        }
+    }
+</script>
+</body>
+</html>
