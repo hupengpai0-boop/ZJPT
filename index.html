@@ -86,7 +86,7 @@
         <h1 class="edu-header">🎓 学历案书写助手</h1>
         <div class="card">
             <label style="font-weight: 600; color: #374151;">1. 教学需求描述 (可选)</label>
-            <textarea id="edu-prompt" placeholder="例如：高中语文《荷塘月色》学历案，包含学习目标、评价任务等..."></textarea>
+            <textarea id="edu-prompt" placeholder="例如：高中生物《细胞免疫》学历案，包含学习目标、评价任务等..."></textarea>
             
             <div class="file-upload-box">
                 <label for="pptFile" style="cursor: pointer;">
@@ -101,7 +101,7 @@
         </div>
 
         <div id="edu-result-card" class="card" style="display: none;">
-            <h3>✨ AI 生成建议 & 结果</h3>
+            <h3>✨ AI 生成进度 & 结果</h3>
             <div id="edu-output" class="result-area"></div>
             <div id="edu-download-space"></div>
         </div>
@@ -149,17 +149,22 @@
             const data = await res.json();
             
             // 正常显示结果
-            output.innerText = data.text || "生成完毕";
+            // 在 .then(data => { ... }) 或 await data = res.json() 后修改
+            const data = await res.json();
+            const output = document.getElementById('edu-output');
+            const downloadSpace = document.getElementById('edu-download-space');
+
+            output.innerText = data.text; // 显示 AI 的文字提示
+
             if (data.download_url) {
-                downloadSpace.innerHTML = `<a href="${data.download_url}" class="btn-download" target="_blank">📥 下载生成的学历案文档</a>`;
-            }
-        } catch (e) {
-            output.innerHTML = `<span class="error-msg">❌ 处理失败：${e.message}</span><br><small>请检查阿里云日志输出定位具体原因</small>`;
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "生成学历案";
-        }
-    }
+            // 渲染下载按钮
+           downloadSpace.innerHTML = `
+        <a href="${data.download_url}" 
+           style="display:block; background:#10b981; color:white; text-align:center; padding:12px; border-radius:8px; text-decoration:none; margin-top:15px; font-weight:bold;" 
+           target="_blank">
+           📥 点击下载学历案文档
+        </a>`;
+}
 
     // 智能出题逻辑
     async function publishQuiz() {
@@ -190,5 +195,6 @@
 
 </body>
 </html>
+
 
 
