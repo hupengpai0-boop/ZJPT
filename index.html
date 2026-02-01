@@ -3,234 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 学历案专家 - 智能课件解析</title>
+    <title>智教指挥中心 - 教师管理后台</title>
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --accent-blue: #6366f1;
             --bg: #f8fafc;
+            --sidebar-bg: #ffffff;
+            --text-main: #1e293b;
+            --border: #e2e8f0;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            color: #1e293b;
+        body { font-family: "Microsoft Yahei", sans-serif; display: flex; height: 100vh; margin: 0; background: var(--bg); color: var(--text-main); overflow: hidden; }
+
+        /* 侧边栏 */
+        .sidebar { width: 240px; background: var(--sidebar-bg); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar h2 { color: var(--primary); font-size: 20px; margin-bottom: 30px; padding-left: 10px; }
+        .menu-item { padding: 12px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 8px; transition: 0.3s; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+        .menu-item:hover { background: #f1f5f9; }
+        .menu-item.active { background: var(--primary); color: white; }
+
+        /* 主体 */
+        .main { flex: 1; padding: 40px; overflow-y: auto; }
+        .section { display: none; max-width: 900px; margin: 0 auto; }
+        .section.active { display: block; animation: fadeIn 0.4s ease; }
+
+        /* 通用卡片 */
+        .card { background: white; border-radius: 16px; padding: 25px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        h1 { font-size: 24px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+
+        /* 输入组件 */
+        textarea, input[type="text"] { width: 100%; border: 1px solid #d1d5db; border-radius: 10px; padding: 15px; margin-top: 10px; box-sizing: border-box; font-size: 14px; resize: vertical; font-family: inherit; }
+        textarea:focus { outline: none; border-color: var(--accent-blue); }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 14px 25px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 16px; }
+        .btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
+
+        /* 学历案专有样式 */
+        .edu-header { color: var(--accent-blue); border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .file-upload-box { 
+            margin: 20px 0; padding: 40px; border: 2px dashed #cbd5e1; border-radius: 12px; 
+            text-align: center; background: #fcfcfc; cursor: pointer; transition: 0.3s; 
         }
+        .file-upload-box:hover { border-color: var(--accent-blue); background: #f5f7ff; }
+        .btn-edu { background: var(--accent-blue); }
+        .btn-edu:hover { background: #4f46e5; }
 
-        .card {
-            background: white;
-            width: 100%;
-            max-width: 500px;
-            padding: 2rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-        }
+        /* 进度条 */
+        .progress-container { display: none; margin-top: 20px; }
+        .progress-bar { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+        .progress-fill { height: 100%; background: var(--accent-blue); width: 0%; transition: width 0.4s; }
+        .status-text { font-size: 13px; color: #64748b; text-align: center; }
 
-        .header { text-align: center; margin-bottom: 2rem; }
-        .header h1 { font-size: 1.5rem; margin: 0; color: #0f172a; }
-        .header p { color: #64748b; font-size: 0.875rem; margin-top: 0.5rem; }
-
-        .drop-zone {
-            border: 2px dashed #e2e8f0;
-            border-radius: 1rem;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s;
-            cursor: pointer;
-            background: #f1f5f9;
-            position: relative;
-        }
-
-        .drop-zone:hover, .drop-zone.active {
-            border-color: var(--primary);
-            background: #eef2ff;
-        }
-
-        .drop-zone input { display: none; }
-
-        .form-group { margin-top: 1.5rem; }
-        label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
+        /* 结果展示 */
+        .result-area { background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid var(--border); min-height: 80px; white-space: pre-wrap; line-height: 1.6; }
         
-        textarea {
-            width: 100%;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.75rem;
-            padding: 0.75rem;
-            min-height: 100px;
-            font-family: inherit;
-            resize: none;
-            transition: border-color 0.3s;
-        }
-
-        textarea:focus { outline: none; border-color: var(--primary); ring: 2px var(--primary); }
-
-        .btn {
-            width: 100%;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            margin-top: 1.5rem;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .btn:hover { background: var(--primary-hover); }
-        .btn:disabled { background: #cbd5e1; cursor: not-allowed; }
-
-        /* 进度条样式 */
-        .progress-container { display: none; margin-top: 1.5rem; }
-        .progress-bar {
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 0.5rem;
-        }
-        .progress-fill {
-            height: 100%;
-            background: var(--primary);
-            width: 0%;
-            transition: width 0.4s ease;
-        }
-        .status-text { font-size: 0.75rem; color: #64748b; text-align: center; }
-
-        .result-card {
-            display: none;
-            margin-top: 1.5rem;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            text-align: center;
-        }
-        .success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-        .error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-        
-        .download-link {
-            display: inline-block;
-            margin-top: 0.75rem;
-            color: var(--primary);
-            font-weight: 700;
-            text-decoration: underline;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <div class="header">
-        <h1>🎓 AI 学历案生成助手</h1>
-        <p>支持 PPT / PPTX 格式，AI 深度解析</p>
-    </div>
-
-    <form id="uploadForm">
-        <div class="drop-zone" id="dropZone">
-            <span id="dropText">点击或拖拽 PPT 文件至此</span>
-            <input type="file" id="fileInput" accept=".ppt,.pptx">
-            <div id="fileInfo" style="margin-top: 0.5rem; font-weight: bold; color: var(--primary);"></div>
-        </div>
-
-        <div class="form-group">
-            <label>特别要求（可选）</label>
-            <textarea id="promptInput" placeholder="例如：强调‘核心素养’培养目标，增加小组讨论环节..."></textarea>
-        </div>
-
-        <button type="submit" class="btn" id="submitBtn">开始智能生成</button>
-    </form>
-
-    <div class="progress-container" id="progressContainer">
-        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="status-text" id="statusText">准备上传...</div>
-    </div>
-
-    <div id="resultCard" class="result-card"></div>
-</div>
-
-<script>
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('fileInput');
-    const fileInfo = document.getElementById('fileInfo');
-    const form = document.getElementById('uploadForm');
-    const btn = document.getElementById('submitBtn');
-    const progressContainer = document.getElementById('progressContainer');
-    const progressFill = document.getElementById('progressFill');
-    const statusText = document.getElementById('statusText');
-    const resultCard = document.getElementById('resultCard');
-
-    // 拖拽交互
-    dropZone.onclick = () => fileInput.click();
-    fileInput.onchange = () => {
-        if (fileInput.files[0]) {
-            fileInfo.innerText = `已选中: ${fileInput.files[0].name}`;
-            document.getElementById('dropText').innerText = "更换文件";
-        }
-    };
-
-    // 状态模拟逻辑（因为扣子API不返回中间进度，我们手动模拟心跳）
-    function simulateProgress() {
-        let progress = 0;
-        const messages = ["正在上传课件...", "AI 正在深度解析 PPT...", "正在提取知识点...", "正在构建学历案逻辑...", "正在导出 Word 文档..."];
-        const interval = setInterval(() => {
-            progress += Math.random() * 5;
-            if (progress > 95) progress = 95; // 停在95%等待真实返回
-            progressFill.style.width = `${progress}%`;
-            statusText.innerText = messages[Math.floor((progress / 100) * messages.length)];
-        }, 2000);
-        return interval;
-    }
-
-    form.onsubmit = async (e) => {
-        e.preventDefault();
-        const file = fileInput.files[0];
-        if (!file) return alert("请先上传 PPT 文件");
-
-        // UI 切换
-        btn.disabled = true;
-        progressContainer.style.display = 'block';
-        resultCard.style.display = 'none';
-        const progressInterval = simulateProgress();
-
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('prompt', document.getElementById('promptInput').value);
-
-        try {
-            const res = await fetch('/api/teacher/edu-helper', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-
-            clearInterval(progressInterval);
-            progressFill.style.width = '100%';
-
-            if (data.success && data.download_url) {
-                resultCard.className = "result-card success";
-                resultCard.innerHTML = `🎉 生成成功！<br><a href="${data.download_url}" target="_blank" class="download-link">点击下载学历案.docx</a>`;
-                resultCard.style.display = 'block';
-                statusText.innerText = "处理完成！";
-            } else {
-                throw new Error(data.text || "生成失败");
-            }
-        } catch (err) {
-            clearInterval(progressInterval);
-            resultCard.className = "result-card error";
-            resultCard.innerText = `❌ 出错了: ${err.message}`;
-            resultCard.style.display = 'block';
-            statusText.innerText = "任务中断";
-        } finally {
-            btn.disabled = false;
-        }
-    };
-</script>
-
-</body>
 <div class="sidebar">
     <h2>智教指挥中心</h2>
     <div class="menu-item active" onclick="switchTab(this, 'dashboard')">📈 班级学情</div>
@@ -249,6 +83,7 @@
     <div id="ai-lab" class="section">
         <h1>✨ 智能教研实验室</h1>
         <div class="card">
+            <label style="font-weight: 600;">试卷原文粘贴</label>
             <textarea id="ai-content" rows="6" placeholder="请粘贴原始试卷文本，AI将自动结构化并同步至飞书题库..."></textarea>
             <input type="text" id="ai-title" placeholder="试卷标题（如：生物有丝分裂周测）">
             <button class="btn" id="ai-pub-btn" onclick="publishQuiz()" style="width: 100%; margin-top: 15px;">立即发布试卷</button>
@@ -265,20 +100,23 @@
             <label style="font-weight: 600; color: #374151;">1. 教学需求描述 (可选)</label>
             <textarea id="edu-prompt" placeholder="例如：高中生物《细胞免疫》学历案，包含学习目标、评价任务等..."></textarea>
             
-            <div class="file-upload-box">
-                <label for="pptFile" style="cursor: pointer;">
-                    <span style="font-size: 32px;">📁</span><br>
-                    <span style="color: var(--accent-blue); font-weight: 600;">点击上传 PPT 课件 (可选)</span>
-                </label>
-                <input type="file" id="pptFile" accept=".ppt,.pptx" style="display: none;" onchange="document.getElementById('file-name').innerText=this.files[0].name">
+            <div class="file-upload-box" onclick="document.getElementById('pptFile').click()">
+                <span style="font-size: 40px;">📁</span><br>
+                <span id="file-display-text" style="color: var(--accent-blue); font-weight: 600;">点击上传 PPT 课件</span>
+                <input type="file" id="pptFile" accept=".ppt,.pptx" style="display: none;" onchange="handleFileSelect(this)">
                 <div id="file-name" style="margin-top:10px; font-size: 13px; color: #64748b;">支持 .ppt / .pptx 格式</div>
             </div>
 
-            <button class="btn btn-edu" id="edu-btn" onclick="generateEduPlan()" style="width: 100%;">生成学历案</button>
+            <button class="btn btn-edu" id="edu-btn" onclick="generateEduPlan()" style="width: 100%;">开始智能生成</button>
+
+            <div class="progress-container" id="edu-progress">
+                <div class="progress-bar"><div class="progress-fill" id="edu-fill"></div></div>
+                <div class="status-text" id="edu-status">准备就绪...</div>
+            </div>
         </div>
 
         <div id="edu-result-card" class="card" style="display: none;">
-            <h3>✨ AI 生成进度 & 结果</h3>
+            <h3>✨ AI 生成结果</h3>
             <div id="edu-output" class="result-area"></div>
             <div id="edu-download-space"></div>
         </div>
@@ -288,6 +126,7 @@
 <script>
     const BACKEND_URL = "https://feishu-backend-gzwqrjhcca.cn-hangzhou.fcapp.run";
 
+    // 核心切换逻辑
     function switchTab(el, tabId) {
         document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
@@ -295,50 +134,80 @@
         document.getElementById(tabId).classList.add('active');
     }
 
-    // 学历案生成逻辑
+    // 文件选择处理
+    function handleFileSelect(input) {
+        if (input.files.length > 0) {
+            document.getElementById('file-display-text').innerText = "已选择文件";
+            document.getElementById('file-name').innerText = input.files[0].name;
+            document.getElementById('file-name').style.color = "#10b981";
+        }
+    }
+
+    // 学历案助手核心逻辑
     async function generateEduPlan() {
         const prompt = document.getElementById('edu-prompt').value.trim();
+        const fileInput = document.getElementById('pptFile');
         const btn = document.getElementById('edu-btn');
+        const progressContainer = document.getElementById('edu-progress');
+        const fill = document.getElementById('edu-fill');
+        const status = document.getElementById('edu-status');
         const output = document.getElementById('edu-output');
         const resCard = document.getElementById('edu-result-card');
         const downloadSpace = document.getElementById('edu-download-space');
 
+        if (!fileInput.files[0] && !prompt) return alert("请上传PPT或填写需求");
+
+        // UI 状态初始化
         btn.disabled = true;
-        btn.innerText = "🚀 AI 正在深度思考中...";
-        resCard.style.display = 'block';
-        downloadSpace.innerHTML = "";
-        output.innerHTML = "⏳ 正在上传并处理，这可能需要约 30-60 秒，请稍候...";
+        resCard.style.display = 'none';
+        progressContainer.style.display = 'block';
+        fill.style.width = '0%';
+        status.innerText = "正在同步文件至 AI 实验室...";
+
+        // 构造 FormData
+        const formData = new FormData();
+        if(fileInput.files[0]) formData.append('file', fileInput.files[0]);
+        formData.append('prompt', prompt || "请生成学历案");
+
+        // 模拟进度条
+        let p = 0;
+        const timer = setInterval(() => {
+            p += Math.random() * 3;
+            if(p > 92) p = 92;
+            fill.style.width = p + '%';
+            if(p > 30) status.innerText = "AI 正在深度解析 PPT 课件...";
+            if(p > 60) status.innerText = "正在组织教学逻辑与排版...";
+        }, 1500);
 
         try {
             const res = await fetch(`${BACKEND_URL}/api/teacher/edu-helper`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt })
+                body: formData // 关键：不能手动加 Content-Type 头
             });
 
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || `服务器错误 (${res.status})`);
-            }
-
+            if (!res.ok) throw new Error("服务器繁忙，请稍后再试");
             const data = await res.json();
-            
-            // 正常显示结果
-            output.innerText = data.text || "学历案生成完成！"; 
+
+            clearInterval(timer);
+            fill.style.width = '100%';
+            status.innerText = "生成成功！";
+
+            resCard.style.display = 'block';
+            output.innerText = data.text || "学历案已生成。";
 
             if (data.download_url) {
                 downloadSpace.innerHTML = `
-                    <a href="${data.download_url}" 
-                       style="display:block; background:#10b981; color:white; text-align:center; padding:12px; border-radius:8px; text-decoration:none; margin-top:15px; font-weight:bold;" 
-                       target="_blank">
-                       📥 点击下载学历案文档
+                    <a href="${data.download_url}" target="_blank" 
+                       style="display:block; background:#10b981; color:white; text-align:center; padding:15px; border-radius:10px; text-decoration:none; margin-top:20px; font-weight:bold;">
+                       📥 下载学历案文档 (Word)
                     </a>`;
             }
         } catch (e) {
-            output.innerHTML = `<span class="error-msg">❌ 失败: ${e.message}</span>`;
+            clearInterval(timer);
+            status.innerText = "处理中断";
+            alert("生成失败: " + e.message);
         } finally {
             btn.disabled = false;
-            btn.innerText = "生成学历案";
         }
     }
 
@@ -357,20 +226,19 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ content, title })
             });
-            if (!res.ok) throw new Error("出题接口异常");
             const data = await res.json();
             document.getElementById('ai-result').style.display = 'block';
             document.getElementById('quiz-link').innerText = `https://endearing-brigadeiros-a8b0d1.netlify.app/?id=${data.qid}`;
         } catch(e) { 
-            alert("发布失败：" + e.message); 
+            alert("发布失败"); 
         } finally { 
             btn.disabled = false; btn.innerText = "立即发布试卷"; 
         }
     }
 </script>
-
 </body>
 </html>
+
 
 
 
